@@ -1,0 +1,35 @@
+<div class="page-header">
+	<div class="logo">
+		<a href="#/" class="glyphicon glyphicon-home" id="settings-overlay"></a>
+		<img id="logo" src="/img/icon48.png" />
+	</div>
+	<h1 id="title">DramaTracker</h1>
+	<p>Settings</p>
+</div>
+<form id="settings-form">
+	<div class="col-md-6 form-inner">
+        <div class="form-group row">
+	    	<label class="control-label">Update frequency</label>
+        	<div class="col-xs-10 center-block">
+				<div class="input-group">
+					<span class="input-group-addon">Every</span>
+					<input type="number" class="form-control" ng-model="settings.updateFrequency">
+					<span class="input-group-addon">minutes</span>
+				</div>
+			</div>
+		</div>
+        <div class="form-group row">
+	    	<label>Minimum subtitles (Viki)</label>
+        	<div class="col-xs-5 center-block">
+				<div class="input-group">
+					<input type="number" class="form-control" min="0" max="100" ng-model="settings.minSubs">
+					<span class="input-group-addon">%</span>
+				</div>
+        	</div>
+		</div>
+        <div class="form-group row">
+        	<button class="btn btn-info" type="button" ng-click="save()">Save</button>
+        </div>
+	 </div>
+</form>
+

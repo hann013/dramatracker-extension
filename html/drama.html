@@ -1,0 +1,10 @@
+<div class="col-md-6 {{ drama.site }}">
+    <a class="glyphicon glyphicon-remove-circle delete-drama"></a>
+	<div class="circle-image" ng-if="drama.image != null">
+		<img class="drama-image" ng-src="{{ drama.image }}"/>
+	</div>
+    <h3 class="drama-name">{{ drama.name }}</h3>
+    <p class="drama-info" ng-if="drama.currentEp">Episode: {{ drama.currentEp }} ({{ drama.currentSubs | uppercase }})</p>
+    <a class="glyphicon glyphicon-eye-open watch-drama" ng-click="goToUrl(drama.currentUrl)"></a>
+    <hr>
+</div>

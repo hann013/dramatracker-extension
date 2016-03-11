@@ -1,0 +1,103 @@
+body {
+    /* avoid an excessively wide status text */
+    min-width: 300px;
+    max-width: 1000px;
+    text-align: center;
+    margin-top: 5%;
+}
+
+/* Header */
+
+#logo {
+    margin: -5% 0;
+}
+
+#settings-overlay { 
+    color: white;
+    display: block;
+    font-size: 2em; 
+    top: 25px; 
+    margin-top: -25px;
+    opacity: 0;
+    transition: opacity 0.5s;
+}
+
+.logo:hover #settings-overlay {
+    opacity: 1;
+}
+
+#title {
+    font-family: 'Righteous', cursive;
+}
+
+p {
+    font-family: 'Open Sans', sans-serif;
+}
+
+/* Add new form */
+
+a.glyphicon:hover {
+    cursor: pointer;
+    text-decoration: none;
+}
+
+.add-new, .watch-drama {
+    color: #5bc0de;
+    font-size: 2.25em;
+}
+
+.add-new:hover, .watch-drama:hover {
+    color: #31b0d5;
+}
+
+#track-new {
+    margin-top: 3%;
+}
+
+/* Drama items */
+
+.delete-drama {
+    color: #E6E6E6;
+    font-size: 1.5em;
+    opacity: 0;
+    display: inline;
+    float: right;
+    margin: -5% -3%;
+}
+
+.delete-drama:hover
+{
+    color: #B3B3B3;
+}
+
+.drama-name {
+    font-family: 'Francois One', sans-serif;
+}
+
+/* Drama item images */
+
+.circle-image {
+    margin: auto;
+    width: 125px;
+    height: 125px;
+    position: relative;
+    overflow: hidden;
+    border-radius: 50%;
+}
+
+.viki img {
+    margin-left: -50%;
+    height: 100%;
+    width: auto;
+}
+
+.myasiantv img {
+    height: auto;
+    width: 100%;
+}
+
+/* Settings */
+.center-block
+{
+    float: none !important;
+}

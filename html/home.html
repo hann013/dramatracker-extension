@@ -1,0 +1,30 @@
+<div class="page-header">
+	<div class="logo">
+		<a href="#/settings" class="glyphicon glyphicon-cog" id="settings-overlay"></a>
+		<img id="logo" src="/img/icon48.png" />
+	</div>
+	<h1 id="title">DramaTracker</h1>
+	<p>Currently tracking {{ dramas.length }} dramas!</p>
+	<a class="glyphicon glyphicon-plus-sign add-new" data-toggle="collapse" data-target="#track-new"></a>
+	<form class="collapse" id="track-new">
+		<div class="form-group col-md-12">
+		    <div class="input-group">
+		      <input type="url" class="form-control" id="url-input" ng-model="newDramaUrl" placeholder="Drama URL">
+		      <span class="input-group-btn">
+		        <button class="btn btn-default" type="button" ng-click="save()">Track</button>
+		      </span>
+		    </div>
+			<div class="collapse" id="error-message" style="color: #a94442;"></div>
+		</div>
+		<div class="form-group">
+		    <label style="display: block" class="control-label">Airs on:</label>
+	    	<label class="checkbox-inline" ng-repeat="(num,day) in daysOfWeek">
+	    		<input checkbox-group class="air-date" type="checkbox" value="{{ num }}">{{ day }}
+	    	</label>
+		</div>
+	</form>
+</div>
+<div class="drama" ng-repeat="drama in dramas | orderBy : 'airDayFromToday'">
+	<drama-item data-index="{{ $index }}"></drama-item>
+</div>
+
