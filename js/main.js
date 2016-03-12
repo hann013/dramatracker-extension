@@ -174,7 +174,7 @@ app.factory('UserService', function(){
         dramaUrls: {},
         settings: {
             updateFrequency : 15,
-            minSubs : 95,
+            minSubs : 95
         }
     };
 
@@ -209,55 +209,7 @@ app.config(function($routeProvider) {
     });
 });
 
-
-// Site Constants
-var VIKI = "viki";
-var MYASIANTV = "myasiantv";
-var UNKNOWN_AIR_DAYS = 7;
-
 // Error Message Consants
 var INVALID_URL_ERR = "Please enter a valid URL.";
 var DUPLICATE_ERR = "You're already tracking this drama!";
-
-// Evaluate an XPath string
-function xPathEvaluate(path, html) {
-    return html.evaluate(path, html, null, XPathResult.STRING_TYPE, null).stringValue;
-}
-
-// Viki Scraping Constants
-var vImage = '//div[@data-block-track="containerThumbnail"]/img/attribute::src';
-var vName = '//div[@class="card billboard"]//h1[@data-block-track="containerLinkFold"]/text()';
-var vCurrentEpNumber = '//a[@data-block-track="watchNow"]/span[@class="accent"]/text()';
-var vCurrentEpUrl = '//a[@data-block-track="watchNow"]/attribute::href';
-var vEpisodes = '//div[@class="media-body"]/h1[@class="media-heading strong"]/text()';
-var vSubs = '/following-sibling::div[@class="grey-text thumb-caption"]/span[1]/text()';
-
-function scrapeViki(html) {
-    var drama = { site: VIKI };
-    drama.image = xPathEvaluate(vImage, html);
-    drama.name = xPathEvaluate(vName, html).trim();
-    var currentEp = xPathEvaluate(vCurrentEpNumber, html);
-    drama.currentEp = currentEp.substring(currentEp.indexOf(".")+1) || 0;
-    drama.currentUrl = xPathEvaluate(vCurrentEpUrl, html);
-    drama.currentSubs = xPathEvaluate('//a[@href="' + drama.currentUrl + '"]' + vSubs, html);
-    return drama;
-}
-
-// MAT Scraping Constants
-var matImage = '//div[@class="movie"]//img[@class="poster"]/attribute::src';
-var matName = '//div[@class="movie"]//h1/text()';
-var matCurrentEpNumber = '//ul[@class="list-episode"]/li/h2/a/text()';
-var matCurrentEpUrl = '//ul[@class="list-episode"]/li/h2/a/attribute::href';
-var matSubs = '//ul[@class="list-episode"]/li/img/attribute::src';
-
-function scrapeMAT(html) {
-    var drama = { site: MYASIANTV };
-    drama.image = xPathEvaluate(matImage, html);
-    drama.name = xPathEvaluate(matName, html);
-    var currentEp = xPathEvaluate(matCurrentEpNumber, html);
-    drama.currentEp = currentEp.substring(currentEp.indexOf("Episode")+8);
-    var subs = xPathEvaluate(matSubs, html); 
-    drama.currentSubs = subs.substring(subs.lastIndexOf("/")+1, subs.indexOf(".png"));
-    drama.currentUrl = xPathEvaluate(matCurrentEpUrl, html);
-    return drama;
-}
+var UNKNOWN_AIR_DAYS = 7;
