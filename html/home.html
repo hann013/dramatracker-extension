@@ -25,6 +25,6 @@
 	</form>
 </div>
 <div class="drama" ng-repeat="drama in dramas | orderBy : 'airDayFromToday'">
-	<drama-item data-index="{{ $index }}"></drama-item>
+	<drama-item data-index="{{ dramas.indexOf(drama) }}"></drama-item>
 </div>
 

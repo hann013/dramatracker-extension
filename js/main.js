@@ -52,9 +52,11 @@ app.controller("HomeController", function($scope, UserService) {
 
             // Next episode airs this week
             if (largest >= $scope.today) {
-                for (var day in dramaAirDays) {
+                for (var i = 0; i < dramaAirDays.length; i++) {
+                    var day = dramaAirDays[i];
                     if (day >= $scope.today) {
                         largest = day;
+                        break;
                     }
                 }
                 nextAirDay = largest - $scope.today;
@@ -152,6 +154,8 @@ app.directive("dramaItem", function(UserService) {
                 UserService.save();
 
                 // Update scope
+                console.log(scope.dramas);
+                console.log(attrs.index);
                 scope.dramas.splice(attrs.index, 1);
                 scope.$apply();
             });
