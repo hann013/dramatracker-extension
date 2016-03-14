@@ -1,7 +1,7 @@
 // Site Constants
 var VIKI = "viki";
 var MYASIANTV = "myasiantv";
-var SUB = "SUB";
+var SUB = "sub";
 
 // Viki Scraping Constants
 var vImage = '//div[@data-block-track="containerThumbnail"]/img/attribute::src';

@@ -8,7 +8,7 @@ $(function() {
     var airingToday = getDramasAiringToday();
 
     for (var i = 0; i < airingToday.length; i++) {
-        var url = airingToday[i];
+        var url = airingToday[i];   
         chrome.alarms.create(url, { 
            periodInMinutes: updateFrequency
         });
@@ -17,7 +17,6 @@ $(function() {
     // Set alarm to check for updates periodically
     chrome.alarms.onAlarm.addListener(function(alarm) {
         var url = alarm.name;
-        console.log("getting updates for: " + url);
         getDramaUpdates(url);
     });
 });
@@ -44,7 +43,6 @@ function getDramasAiringToday() {
 
 // Generate notifications based on selected frequency
 function createNotification(drama, messageBody) {
-    var id = "dramaNotification" + new Date().getTime();
     var opt = {
         type: "basic",
         title: drama.name,
@@ -55,11 +53,12 @@ function createNotification(drama, messageBody) {
         }]
     };
     
-    chrome.notifications.create(id, opt);
+    chrome.notifications.create(drama.url, opt);
 
     chrome.notifications.onButtonClicked.addListener(function(id, button) {
         chrome.tabs.create({ active: true, url: drama.currentUrl });
-        chrome.alarms.clear(drama.url);
+        chrome.notifications.clear(id);
+        chrome.alarms.clear(id);
     });
 }
 
@@ -85,8 +84,9 @@ function getDramaUpdates(url) {
 
                 switch (drama.site) {
                     case MYASIANTV:
+                        console.log(drama.name + ": " + drama.currentSubs + " at " + (new Date()).toTimeString());
                         if (drama.currentSubs == SUB) {
-                            var message = "Episode " + drama.currentEp + "is subbed!";
+                            var message = "Episode " + drama.currentEp + " is subbed!";
                             createNotification(drama, message);
                         }
                         break;
