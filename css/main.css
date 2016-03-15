@@ -34,7 +34,7 @@ p {
     font-family: 'Open Sans', sans-serif;
 }
 
-/* Add new form */
+/* Track new drama form */
 
 a.glyphicon:hover {
     cursor: pointer;
@@ -97,6 +97,7 @@ a.glyphicon:hover {
 }
 
 /* Settings */
+
 .center-block
 {
     float: none !important;
