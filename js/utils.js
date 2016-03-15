@@ -1,3 +1,14 @@
+// Default user settings 
+var defaultSettings = {
+    dramaUrls: {},
+    settings: {
+        updateFrequency : 15,
+        minSubs : 95
+    }
+};
+
+var SETTINGS_UPDATED_MSG = "settings updated";
+
 // Site Constants
 var VIKI = "viki";
 var MYASIANTV = "myasiantv";

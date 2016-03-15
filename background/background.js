@@ -1,30 +1,50 @@
 // Get user settings
-var settings = JSON.parse(localStorage.DramaTracker).settings;
-var updateFrequency = settings.updateFrequency;
-var minSubs = settings.minSubs;
+var settings = null;
 
 // Begin tracking dramas airing today on startup
 $(function() { 
-    var airingToday = getDramasAiringToday();
-
-    for (var i = 0; i < airingToday.length; i++) {
-        var url = airingToday[i];   
-        chrome.alarms.create(url, { 
-           periodInMinutes: updateFrequency
-        });
-    }
+    updateDramaTracking();
 
     // Set alarm to check for updates periodically
     chrome.alarms.onAlarm.addListener(function(alarm) {
         var url = alarm.name;
         getDramaUpdates(url);
     });
+
+    // Set listener for any user settings updates
+    chrome.runtime.onMessage.addListener(
+      function(request) {
+        updateDramaTracking();
+      });
 });
+
+// Get updated settings and update tracking of dramas
+function updateDramaTracking() {
+    // Clear all previous alarms
+    chrome.alarms.getAll(function(alarms) {
+        for (i = 0; i < alarms.length; i++) {
+            var alarmName = alarms[i].name;
+            chrome.alarms.clear(alarmName);
+        }
+    });
+
+    // Get updated settings
+    settings = localStorage.DramaTracker ? JSON.parse(localStorage.DramaTracker).settings : defaultSettings;
+    var airingToday = getDramasAiringToday();
+
+    // Set up periodic polling for drama updates
+    for (i = 0; i < airingToday.length; i++) {
+        var url = airingToday[i];   
+        chrome.alarms.create(url, { 
+           periodInMinutes: settings.updateFrequency
+        });
+    }
+}
 
 // Determine which dramas are airing today
 function getDramasAiringToday() { 
     var today = (new Date()).getDay();
-    var dramaUrls = JSON.parse(localStorage.DramaTracker).dramaUrls;
+    var dramaUrls = settings.dramaUrls;
 
     var airingToday = [];
 
@@ -92,7 +112,7 @@ function getDramaUpdates(url) {
                         break;
                     case VIKI:
                         var subsPercent = parseInt(drama.currentSubs.match('[0-9]+')[0]);
-                        if (subsPercent >= minSubs) {
+                        if (subsPercent >= settings.minSubs) {
                             var message = "Episode " + drama.currentEp + " is " + drama.currentSubs + " subbed!";
                             createNotification( drama, message);
                         }

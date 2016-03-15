@@ -154,8 +154,6 @@ app.directive("dramaItem", function(UserService) {
                 UserService.save();
 
                 // Update scope
-                console.log(scope.dramas);
-                console.log(attrs.index);
                 scope.dramas.splice(attrs.index, 1);
                 scope.$apply();
             });
@@ -173,23 +171,15 @@ app.directive("dramaItem", function(UserService) {
 
 // Service to save user settings
 app.factory('UserService', function(){ 
-    // Default user settings 
-    var defaults = {
-        dramaUrls: {},
-        settings: {
-            updateFrequency : 15,
-            minSubs : 95
-        }
-    };
-
     // Save and restore user settings to/from Chrome local storage
     var service = {
         user: {},
         save: function() {
-            localStorage.DramaTracker = angular.toJson(service.user);                                 
+            localStorage.DramaTracker = angular.toJson(service.user);
+            chrome.runtime.sendMessage(SETTINGS_UPDATED_MSG);
         },
         restore: function() {
-            service.user = angular.fromJson(localStorage.DramaTracker) || defaults;
+            service.user = angular.fromJson(localStorage.DramaTracker) || defaultSettings;
         },
     }
 
