@@ -44,7 +44,7 @@ app.controller("HomeController", function($scope, UserService) {
 
     function getNextAirDay(url) {
         // Set sort order by next air day
-        var dramaAirDays = UserService.user.dramaUrls[url];
+        var dramaAirDays = UserService.user.dramaUrls[url].airDays;
         var nextAirDay = UNKNOWN_AIR_DAYS;
 
         if (dramaAirDays.length > 0) {
@@ -88,7 +88,7 @@ app.controller("HomeController", function($scope, UserService) {
             $('#track-new').collapse('hide');
 
             // Save the URL
-            UserService.user.dramaUrls[newDramaUrl] = $scope.airDays;
+            UserService.user.dramaUrls[newDramaUrl] = { airDays: $scope.airDays };
             UserService.save();
 
             // Reset form and list of air days 
@@ -140,17 +140,20 @@ app.directive("dramaItem", function(UserService) {
         scope: true,
         templateUrl: "/html/drama.html",
         link: function(scope, element, attrs) {
-            // Go to the drama's current episode
-            scope.goToUrl = function(location) {
-                chrome.tabs.create({ active: true, url: location });
-            }
+            var drama = scope.drama;
+            
+            // Update a drama's last watched episode
+            var watchButton = $(element).find(".watch-drama");
+            watchButton.on('click', function() {
+                setWatchedEp(drama.url, drama.currentEp, UserService);
+                goToUrl(drama.currentUrl);
+            });
 
             // Delete a drama
             var deleteButton = $(element).find(".delete-drama");
             deleteButton.on('click', function() {               
                 // Delete saved URL
-                var url = scope.drama.url;
-                delete UserService.user.dramaUrls[url];
+                delete UserService.user.dramaUrls[drama.url];
                 UserService.save();
 
                 // Update scope

@@ -1,5 +1,19 @@
-// Get user settings
-var settings = null;
+// User settings
+var userInfo = null;
+
+/* 
+
+Information about dramas being tracked today
+{
+    "http://urlOfDrama": {
+        url: string,
+        episode: integer,
+    }
+}
+
+*/
+
+var currentDramasInfo = {};
 
 // Begin tracking dramas airing today on startup
 $(function() { 
@@ -12,14 +26,29 @@ $(function() {
     });
 
     // Set listener for any user settings updates
-    chrome.runtime.onMessage.addListener(
-      function(request) {
-        updateDramaTracking();
-      });
+    chrome.runtime.onMessage.addListener(function(request) {
+        if (request == SETTINGS_UPDATED_MSG) {
+            updateDramaTracking();            
+        }
+    });
+
+    // Set listener for "Watch now" button
+    chrome.notifications.onButtonClicked.addListener(function(id, button) {
+        var dramaInfo = currentDramasInfo[id];
+
+        // Open tab for current episode and set episode as watched
+        goToUrl(dramaInfo.url);
+        setWatchedEp(id, dramaInfo.episode);
+
+        // Clear tracking for this drama
+        chrome.notifications.clear(id);
+        chrome.alarms.clear(id);
+    });
 });
 
 // Get updated settings and update tracking of dramas
 function updateDramaTracking() {
+    console.log("Tracking");
     // Clear all previous alarms
     chrome.alarms.getAll(function(alarms) {
         for (i = 0; i < alarms.length; i++) {
@@ -29,14 +58,14 @@ function updateDramaTracking() {
     });
 
     // Get updated settings
-    settings = localStorage.DramaTracker ? JSON.parse(localStorage.DramaTracker).settings : defaultSettings;
+    userInfo = localStorage.DramaTracker ? JSON.parse(localStorage.DramaTracker) : defaultSettings;
     var airingToday = getDramasAiringToday();
 
     // Set up periodic polling for drama updates
     for (i = 0; i < airingToday.length; i++) {
         var url = airingToday[i];   
         chrome.alarms.create(url, { 
-           periodInMinutes: settings.updateFrequency
+           periodInMinutes: userInfo.settings.updateFrequency
         });
     }
 }
@@ -44,12 +73,12 @@ function updateDramaTracking() {
 // Determine which dramas are airing today
 function getDramasAiringToday() { 
     var today = (new Date()).getDay();
-    var dramaUrls = settings.dramaUrls;
+    var dramaUrls = userInfo.dramaUrls;
 
     var airingToday = [];
 
     for (var url in dramaUrls) {
-        var airDays = dramaUrls[url];
+        var airDays = dramaUrls[url].airDays;
 
         for (var i = 0; i < airDays.length; i++) {
             if (airDays[i] == today) {
@@ -68,6 +97,7 @@ function createNotification(drama, messageBody) {
         title: drama.name,
         message: messageBody,
         iconUrl: drama.image,
+        isClickable : false,
         buttons: [{
             title: "Watch Now"
         }]
@@ -75,11 +105,11 @@ function createNotification(drama, messageBody) {
     
     chrome.notifications.create(drama.url, opt);
 
-    chrome.notifications.onButtonClicked.addListener(function(id, button) {
-        chrome.tabs.create({ active: true, url: drama.currentUrl });
-        chrome.notifications.clear(id);
-        chrome.alarms.clear(id);
-    });
+    // Update the drama's current URL and episode number
+    currentDramasInfo[drama.url] = { 
+        url: drama.currentUrl,
+        episode: drama.currentEp
+    };
 }
 
 // Get drama details and check for updates
@@ -100,23 +130,28 @@ function getDramaUpdates(url) {
         xhr.onreadystatechange = function() { 
             if (xhr.readyState == 4 && xhr.status == 200) {
                 var drama = callback(xhr.responseXML);
-                drama.url = url;
+                var lastWatched = userInfo.dramaUrls[url].lastWatched;
 
-                switch (drama.site) {
-                    case MYASIANTV:
-                        console.log(drama.name + ": " + drama.currentSubs + " at " + (new Date()).toTimeString());
-                        if (drama.currentSubs == SUB) {
-                            var message = "Episode " + drama.currentEp + " is subbed!";
-                            createNotification(drama, message);
-                        }
-                        break;
-                    case VIKI:
-                        var subsPercent = parseInt(drama.currentSubs.match('[0-9]+')[0]);
-                        if (subsPercent >= settings.minSubs) {
-                            var message = "Episode " + drama.currentEp + " is " + drama.currentSubs + " subbed!";
-                            createNotification( drama, message);
-                        }
-                        break;
+                // Only show notification for a new episode
+                if (!lastWatched || drama.currentEp > lastWatched) {
+                    drama.url = url;
+
+                    switch (drama.site) {
+                        case MYASIANTV:
+                            console.log(drama.name + ": " + drama.currentSubs + " at " + (new Date()).toTimeString());
+                            if (drama.currentSubs == SUB) {
+                                var message = "Episode " + drama.currentEp + " is subbed!";
+                                createNotification(drama, message);
+                            }
+                            break;
+                        case VIKI:
+                            var subsPercent = parseInt(drama.currentSubs.match('[0-9]+')[0]);
+                            if (subsPercent >= userInfo.settings.minSubs) {
+                                var message = "Episode " + drama.currentEp + " is " + drama.currentSubs + " subbed!";
+                                createNotification( drama, message);
+                            }
+                            break;
+                    }                
                 }
             }
         }

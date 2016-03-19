@@ -1,13 +1,28 @@
-// Default user settings 
+/* 
+
+Default user settings
+
+dramaUrls: {
+    "http://urlOfDrama": {
+        airDays: [ integer ],
+        lastWatched: integer
+    }
+}
+settings: {
+    updateFrequency: integer,
+    minSubs: integer
+} 
+
+*/ 
 var defaultSettings = {
     dramaUrls: {},
     settings: {
-        updateFrequency : 15,
+        updateFrequency : 30,
         minSubs : 95
     }
 };
 
-var SETTINGS_UPDATED_MSG = "settings updated";
+var SETTINGS_UPDATED_MSG = "Settings updated.";
 
 // Site Constants
 var VIKI = "viki";
@@ -56,4 +71,23 @@ function scrapeMAT(html) {
     drama.currentSubs = subs.substring(subs.lastIndexOf("/")+1, subs.indexOf(".png"));
     drama.currentUrl = xPathEvaluate(matCurrentEpUrl, html);
     return drama;
+}
+
+// Update last watched episode
+function setWatchedEp(url, episode, UserService) {
+    if (UserService) {
+        UserService.user.dramaUrls[url].lastWatched = parseInt(episode);
+        UserService.save();
+    } else if (userInfo) {
+        userInfo.dramaUrls[url].lastWatched = parseInt(episode);
+        localStorage.DramaTracker = JSON.stringify(userInfo);
+    }
+}
+
+// Open a new tab to a URL
+function goToUrl(newTabUrl) {
+    chrome.tabs.create({ 
+        active: true, 
+        url: newTabUrl 
+    });
 }
