@@ -24,6 +24,7 @@ body {
 
 .logo:hover #settings-overlay {
     opacity: 1;
+    text-decoration: none;
 }
 
 #title {
