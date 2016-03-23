@@ -130,7 +130,7 @@ function getDramaUpdates(url) {
         xhr.onreadystatechange = function() { 
             if (xhr.readyState == 4 && xhr.status == 200) {
                 var drama = callback(xhr.responseXML);
-                var lastWatched = userInfo.dramaUrls[url].lastWatched;
+                var lastWatched = userInfo.dramaUrls[url] ? userInfo.dramaUrls[url].lastWatched : null;
 
                 // Only show notification for a new episode
                 if (!lastWatched || drama.currentEp > lastWatched) {
@@ -140,15 +140,13 @@ function getDramaUpdates(url) {
                         case MYASIANTV:
                             console.log(drama.name + ": " + drama.currentSubs + " at " + (new Date()).toTimeString());
                             if (drama.currentSubs == SUB) {
-                                var message = "Episode " + drama.currentEp + " is subbed!";
-                                createNotification(drama, message);
+                                createNotification(drama, buildNotificationMessage(drama.currentEp));
                             }
                             break;
                         case VIKI:
                             var subsPercent = parseInt(drama.currentSubs.match('[0-9]+')[0]);
                             if (subsPercent >= userInfo.settings.minSubs) {
-                                var message = "Episode " + drama.currentEp + " is " + drama.currentSubs + " subbed!";
-                                createNotification( drama, message);
+                                createNotification( drama, buildNotificationMessage(drama.currentEp, drama.currentSubs));
                             }
                             break;
                     }                
@@ -159,4 +157,11 @@ function getDramaUpdates(url) {
         xhr.responseType = "document";
         xhr.send();
     }
+}
+
+function buildNotificationMessage(episodeNumber, subs) {
+    if (subs) {
+        subs = subs + " ";
+    }
+    return "Episode " + episodeNumber + " is " + subs + "subbed!";
 }
