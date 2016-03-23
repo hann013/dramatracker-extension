@@ -76,13 +76,8 @@ app.controller("HomeController", function($scope, UserService) {
 
         // Show error message if URL is invalid
         if (!newDramaUrl || UserService.user.dramaUrls.hasOwnProperty(newDramaUrl)) {
-            $("#error-message").text(!newDramaUrl ? INVALID_URL_ERR : DUPLICATE_ERR);
-            $("#error-message").collapse("show");
-            $("#url-input").parent().addClass("has-error");
-            $("#url-input").focus(function() {
-                $("#error-message").collapse("hide");
-                $("#url-input").parent().removeClass("has-error");
-            });        
+            var errorMessage = !newDramaUrl ? INVALID_URL_ERR : DUPLICATE_ERR;
+            showError("url-input", "error-message", errorMessage);
         } else {
             // Collapse the form
             $('#track-new').collapse('hide');
@@ -107,8 +102,17 @@ app.controller("SettingsController", function($scope, $location, UserService) {
 
     // Save settings and redirect to home page
     $scope.save = function() {
-        UserService.save();
-        $location.path("/"); 
+        if (!$scope.settings.updateFrequency || !$scope.settings.minSubs) {
+            if (!$scope.settings.updateFrequency) {
+                showError("freq-input", "error-frequency", "Please enter a number greater than 1.");
+            }
+            if (!$scope.settings.minSubs) {
+                showError("subs-input", "error-subs", "Please enter a number between 0 and 100.");
+            }
+        } else {
+            UserService.save();
+            $location.path("/"); 
+        }
     }
 });
 
@@ -205,6 +209,20 @@ app.config(function($routeProvider) {
         redirectTo: "/"
     });
 });
+
+// Display an error message for a form
+function showError(inputId, messageId, message) {
+    inputId = "#" + inputId;
+    messageId = "#" + messageId;
+
+    $(messageId).text(message);
+    $(messageId).collapse("show");
+    $(inputId).parent(".input-group").addClass("has-error");
+    $(inputId).focus(function() {
+        $(messageId).collapse("hide");
+        $(inputId).parent().removeClass("has-error");
+    });
+}
 
 // Error Message Consants
 var INVALID_URL_ERR = "Please enter a valid URL.";
