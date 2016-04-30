@@ -66,7 +66,7 @@ app.controller("HomeController", function($scope, UserService) {
             UserService.user.dramaUrls[newDramaUrl] = { airDays: $scope.airDays };
             UserService.save();
 
-            // Reset form and list of air days 
+            // Reset form and list of air days
             $scope.airDays = [];
             document.getElementById("track-new").reset();
 
@@ -204,7 +204,7 @@ function showError(inputId, messageId, message) {
     });
 }
 
-// Error Message Consants
+// Error message constants
 var INVALID_URL_ERR = "Please enter a valid URL.";
 var DUPLICATE_ERR = "You're already tracking this drama!";
 var UNKNOWN_AIR_DAYS = 7;

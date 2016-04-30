@@ -24,10 +24,14 @@ var defaultSettings = {
 
 // Miscellaneous constants
 var SETTINGS_UPDATED_MSG = "Settings updated.";
-var REGEX_NUMBERS = '[0-9]+';
+var REGEX_NUMBERS = "[0-9]+";
 var SUB = "sub";
 
 // Site constants
+var VIKI = "viki";
+var MYASIANTV = "myasiantv";
+var DRAMAFEVER = "dramafever";
+
 var scrapeConstants = {
     "viki" : {
         name: '//div[@class="card billboard"]//h1[@data-block-track="containerLinkFold"]/text()',
@@ -97,16 +101,16 @@ function scrapeSite(html, website) {
     drama.currentUrl = xPathEvaluate(constants.currentEpUrl, html);
     
     switch (website) {
-        case "viki":
+        case VIKI:
             var currentSubs = xPathEvaluate('//a[@href="' + drama.currentUrl + '"]' + constants.currentSubs, html);
             drama.currentSubs = currentSubs.match(REGEX_NUMBERS)[0] + "%";
             break;
-        case "myasiantv":
+        case MYASIANTV:
             var currentSubs = xPathEvaluate(constants.currentSubs, html);
             drama.currentSubs = currentSubs.substring(currentSubs.lastIndexOf("/")+1, currentSubs.indexOf(".png"));
             break;
-        default:
-            drama.currentSubs = null;
+        case DRAMAFEVER:
+            drama.currentSubs = "Check DF";
     }
     
     return drama;
