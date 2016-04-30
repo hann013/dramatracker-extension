@@ -22,54 +22,93 @@ var defaultSettings = {
     }
 };
 
+// Miscellaneous constants
 var SETTINGS_UPDATED_MSG = "Settings updated.";
-
-// Site Constants
-var VIKI = "viki";
-var MYASIANTV = "myasiantv";
+var REGEX_NUMBERS = '[0-9]+';
 var SUB = "sub";
 
-// Viki Scraping Constants
-var vImage = '//div[@data-block-track="containerThumbnail"]/img/attribute::src';
-var vName = '//div[@class="card billboard"]//h1[@data-block-track="containerLinkFold"]/text()';
-var vCurrentEpNumber = '//a[@data-block-track="watchNow"]/span[@class="accent"]/text()';
-var vCurrentEpUrl = '//a[@data-block-track="watchNow"]/attribute::href';
-var vEpisodes = '//div[@class="media-body"]/h1[@class="media-heading strong"]/text()';
-var vSubs = '/following-sibling::div[@class="grey-text thumb-caption"]/span[1]/text()';
+// Site constants
+var scrapeConstants = {
+    "viki" : {
+        name: '//div[@class="card billboard"]//h1[@data-block-track="containerLinkFold"]/text()',
+        image: '//div[@data-block-track="containerThumbnail"]/img/attribute::src',
+        currentEpNumber: '//a[@data-block-track="watchNow"]/span[@class="accent"]/text()',
+        currentEpUrl: '//a[@data-block-track="watchNow"]/attribute::href',
+        currentSubs: '/following-sibling::div[@class="grey-text thumb-caption"]/span[1]/text()'
+    },
 
-// MAT Scraping Constants
-var matImage = '//div[@class="movie"]//img[@class="poster"]/attribute::src';
-var matName = '//div[@class="movie"]//h1/text()';
-var matCurrentEpNumber = '//ul[@class="list-episode"]/li/h2/a/text()';
-var matCurrentEpUrl = '//ul[@class="list-episode"]/li/h2/a/attribute::href';
-var matSubs = '//ul[@class="list-episode"]/li/img/attribute::src';
+    "myasiantv" : {
+        name: '//div[@class="movie"]//h1/text()',
+        image: '//div[@class="movie"]//img[@class="poster"]/attribute::src',
+        currentEpNumber: '//ul[@class="list-episode"]/li/h2/a/text()',
+        currentEpUrl: '//ul[@class="list-episode"]/li/h2/a/attribute::href',
+        currentSubs: '//ul[@class="list-episode"]/li/img/attribute::src'
+    },
+
+    "dramafever" : {
+        name: '//article[@class="series-header"]//h1/text()',
+        image: '//div[@class="series-thumbnail"]/img/attribute::src',
+        currentEpNumber: '//table[contains(@class, "episode-list")]//th[@class="table-switch"]/text()',
+        currentEpUrl: '//meta[@property="og:url"]/attribute::content',
+        currentSubs: null
+    }
+}
 
 // Evaluate an XPath string
 function xPathEvaluate(path, html) {
     return html.evaluate(path, html, null, XPathResult.STRING_TYPE, null).stringValue;
 }
 
-function scrapeViki(html) {
-    var drama = { site: VIKI };
-    drama.image = xPathEvaluate(vImage, html);
-    drama.name = xPathEvaluate(vName, html).trim();
-    var currentEp = xPathEvaluate(vCurrentEpNumber, html);
-    drama.currentEp = currentEp.substring(currentEp.indexOf(".")+1) || 0;
-    drama.currentUrl = xPathEvaluate(vCurrentEpUrl, html);
-    var currentSubs = xPathEvaluate('//a[@href="' + drama.currentUrl + '"]' + vSubs, html);
-    drama.currentSubs = currentSubs.match('[0-9]+')[0] + "%";
-    return drama;
+function scrapeDrama(url, callback) {
+    // Check website to determine scrape
+    var siteComponents = new URL(url).hostname.split('.');
+    var domain = siteComponents.length == 2 ? siteComponents[0] : siteComponents[1];
+    var siteToScrape = domain in scrapeConstants ? domain : null;
+
+    // If supported, scrape the site and run callback
+    if (siteToScrape) {
+        var xhr = new XMLHttpRequest();
+        xhr.onreadystatechange = function() { 
+            if (xhr.readyState == 4 && xhr.status == 200) {
+                var drama = scrapeSite(xhr.responseXML, siteToScrape);
+                callback(drama);
+            }
+        }
+        xhr.open("GET", url, true);
+        xhr.responseType = "document";
+        xhr.send();
+    }    
 }
 
-function scrapeMAT(html) {
-    var drama = { site: MYASIANTV };
-    drama.image = xPathEvaluate(matImage, html);
-    drama.name = xPathEvaluate(matName, html);
-    var currentEp = xPathEvaluate(matCurrentEpNumber, html);
-    drama.currentEp = currentEp.substring(currentEp.indexOf("Episode")+8);
-    var subs = xPathEvaluate(matSubs, html); 
-    drama.currentSubs = subs.substring(subs.lastIndexOf("/")+1, subs.indexOf(".png"));
-    drama.currentUrl = xPathEvaluate(matCurrentEpUrl, html);
+function scrapeSite(html, website) {
+    var drama = { site: website };
+    var constants = scrapeConstants[website];
+
+    drama.name = xPathEvaluate(constants.name, html).trim();
+
+    drama.image = xPathEvaluate(constants.image, html);
+    if (drama.image.indexOf("http:") == -1 && drama.image.indexOf("https:") == -1) {
+        drama.image = "http:" + drama.image;
+    }
+
+    var currentEp = xPathEvaluate(constants.currentEpNumber, html);
+    drama.currentEp = currentEp.match(REGEX_NUMBERS)[0];
+    
+    drama.currentUrl = xPathEvaluate(constants.currentEpUrl, html);
+    
+    switch (website) {
+        case "viki":
+            var currentSubs = xPathEvaluate('//a[@href="' + drama.currentUrl + '"]' + constants.currentSubs, html);
+            drama.currentSubs = currentSubs.match(REGEX_NUMBERS)[0] + "%";
+            break;
+        case "myasiantv":
+            var currentSubs = xPathEvaluate(constants.currentSubs, html);
+            drama.currentSubs = currentSubs.substring(currentSubs.lastIndexOf("/")+1, currentSubs.indexOf(".png"));
+            break;
+        default:
+            drama.currentSubs = null;
+    }
+    
     return drama;
 }
 

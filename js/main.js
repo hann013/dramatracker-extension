@@ -8,38 +8,18 @@ app.controller("HomeController", function($scope, UserService) {
     $scope.airDays = [];
     $scope.daysOfWeek = { 0 : "S", 1 : "M", 2 :"T", 3 :"W", 4 :"T", 5 :"F", 6 :"S" };
 
-    for (var url in UserService.user.dramaUrls) {
+    for (url in UserService.user.dramaUrls) {
         getDramaDetails(url);
     };
 
     function getDramaDetails(url) {
-        var callback = null;
+        scrapeDrama(url, function(drama) { 
+            drama.url = url;
+            drama.airDayFromToday = getNextAirDay(url);
 
-        // Check website to determine scrape
-        var site = new URL(url).hostname;
-        if (site.indexOf(MYASIANTV) != -1) {
-            callback = scrapeMAT;
-        } else if (site.indexOf(VIKI) != -1) {
-            callback = scrapeViki;
-        }
-
-        // Scrape the site
-        if (callback) {
-            var xhr = new XMLHttpRequest();
-            xhr.onreadystatechange = function() { 
-                if (xhr.readyState == 4 && xhr.status == 200) {
-                    var drama = callback(xhr.responseXML);
-                    drama.url = url;
-                    drama.airDayFromToday = getNextAirDay(url);
-
-                    $scope.dramas.push(drama);
-                    $scope.$apply();
-                }
-            }
-            xhr.open("GET", url, true);
-            xhr.responseType = "document";
-            xhr.send();
-        }
+            $scope.dramas.push(drama);
+            $scope.$apply();
+        });
     }
 
     function getNextAirDay(url) {
@@ -52,7 +32,7 @@ app.controller("HomeController", function($scope, UserService) {
 
             // Next episode airs this week
             if (largest >= $scope.today) {
-                for (var i = 0; i < dramaAirDays.length; i++) {
+                for (i = 0; i < dramaAirDays.length; i++) {
                     var day = dramaAirDays[i];
                     if (day >= $scope.today) {
                         largest = day;

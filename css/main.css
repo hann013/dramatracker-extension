@@ -90,7 +90,7 @@ a.glyphicon:hover {
     border-radius: 50%;
 }
 
-.viki img {
+.viki img, .dramafever img {
     margin-left: -50%;
     height: 100%;
     width: auto;
