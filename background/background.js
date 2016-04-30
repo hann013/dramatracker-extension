@@ -36,7 +36,7 @@ $(function() {
     chrome.notifications.onButtonClicked.addListener(function(id, buttonIndex) {
         var dramaInfo = currentDramasInfo[id];
 
-        // "Watch Now" button clicked
+        // "Watch now" button clicked
         if (buttonIndex == 0) {
             // Open tab for current episode and set episode as watched
             goToUrl(dramaInfo.url);
@@ -46,7 +46,7 @@ $(function() {
             chrome.notifications.clear(id);
             chrome.alarms.clear(id);
 
-        // "Mute Notifications" button clicked
+        // "Mute notifications" button clicked
         } else if (buttonIndex == 1) {
             // Clear tracking for this drama
             chrome.notifications.clear(id);
@@ -109,9 +109,11 @@ function createNotification(drama, messageBody) {
         iconUrl: drama.image,
         isClickable : false,
         buttons: [{
-            title: "Watch Now"
+            title: "Watch now",
+            iconUrl: "/img/watch-now.png"
         }, {
-            title: "Mute Notifications"
+            title: "Mute notifications",
+            iconUrl: "/img/mute.png"
         }]
     };
     
@@ -127,7 +129,6 @@ function createNotification(drama, messageBody) {
 // Get drama details and check for updates
 function getDramaUpdates(url) {
     scrapeDrama(url, function(drama) {
-        console.log("Checking updates");
         var lastWatched = userInfo.dramaUrls[url] ? userInfo.dramaUrls[url].lastWatched : null;
 
         // Only show notification for a new episode
@@ -143,12 +144,15 @@ function getDramaUpdates(url) {
                     }
                     break;
                 case VIKI:
-                    var subsPercent = parseInt(drama.currentSubs.match('[0-9]+')[0]);
+                    var subsPercent = parseInt(drama.currentSubs.match(REGEX_NUMBERS)[0]);
                     if (subsPercent >= userInfo.settings.minSubs) {
-                        createNotification( drama, buildNotificationMessage(drama.currentEp, drama.currentSubs));
+                        createNotification(drama, buildNotificationMessage(drama.currentEp, drama.currentSubs));
                     }
                     break;
-            }                
+                case DRAMAFEVER:
+                    createNotification(drama, buildNotificationMessage(drama.currentEp, "possibly"));
+                    break;
+            }
         }
     });
 }
