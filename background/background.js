@@ -33,22 +33,32 @@ $(function() {
     });
 
     // Set listener for "Watch now" button
-    chrome.notifications.onButtonClicked.addListener(function(id, button) {
+    chrome.notifications.onButtonClicked.addListener(function(id, buttonIndex) {
         var dramaInfo = currentDramasInfo[id];
 
-        // Open tab for current episode and set episode as watched
-        goToUrl(dramaInfo.url);
-        setWatchedEp(id, dramaInfo.episode);
+        // "Watch Now" button clicked
+        if (buttonIndex == 0) {
+            // Open tab for current episode and set episode as watched
+            goToUrl(dramaInfo.url);
+            setWatchedEp(id, dramaInfo.episode);
 
-        // Clear tracking for this drama
-        chrome.notifications.clear(id);
-        chrome.alarms.clear(id);
+            // Clear tracking for this drama
+            chrome.notifications.clear(id);
+            chrome.alarms.clear(id);
+
+        // "Mute Notifications" button clicked
+        } else if (buttonIndex == 1) {
+            // Clear tracking for this drama
+            chrome.notifications.clear(id);
+            chrome.alarms.clear(id);
+        }
     });
 });
 
 // Get updated settings and update tracking of dramas
 function updateDramaTracking() {
     console.log("Tracking");
+
     // Clear all previous alarms
     chrome.alarms.getAll(function(alarms) {
         for (i = 0; i < alarms.length; i++) {
@@ -100,6 +110,8 @@ function createNotification(drama, messageBody) {
         isClickable : false,
         buttons: [{
             title: "Watch Now"
+        }, {
+            title: "Mute Notifications"
         }]
     };
     
@@ -114,54 +126,34 @@ function createNotification(drama, messageBody) {
 
 // Get drama details and check for updates
 function getDramaUpdates(url) {
-    var callback = null;
+    scrapeDrama(url, function(drama) {
+        console.log("Checking updates");
+        var lastWatched = userInfo.dramaUrls[url] ? userInfo.dramaUrls[url].lastWatched : null;
 
-    // Check website to determine scrape
-    var site = new URL(url).hostname;
-    if (site.indexOf(MYASIANTV) != -1) {
-        callback = scrapeMAT;
-    } else if (site.indexOf(VIKI) != -1) {
-        callback = scrapeViki;
-    }
+        // Only show notification for a new episode
+        if (!lastWatched || drama.currentEp > lastWatched) {
+            drama.url = url;
 
-    // Scrape the site
-    if (callback) {
-        var xhr = new XMLHttpRequest();
-        xhr.onreadystatechange = function() { 
-            if (xhr.readyState == 4 && xhr.status == 200) {
-                var drama = callback(xhr.responseXML);
-                var lastWatched = userInfo.dramaUrls[url] ? userInfo.dramaUrls[url].lastWatched : null;
+            console.log(drama.name + ": " + drama.currentSubs + " at " + (new Date()).toTimeString());
 
-                // Only show notification for a new episode
-                if (!lastWatched || drama.currentEp > lastWatched) {
-                    drama.url = url;
-
-                    switch (drama.site) {
-                        case MYASIANTV:
-                            console.log(drama.name + ": " + drama.currentSubs + " at " + (new Date()).toTimeString());
-                            if (drama.currentSubs == SUB) {
-                                createNotification(drama, buildNotificationMessage(drama.currentEp));
-                            }
-                            break;
-                        case VIKI:
-                            var subsPercent = parseInt(drama.currentSubs.match('[0-9]+')[0]);
-                            if (subsPercent >= userInfo.settings.minSubs) {
-                                createNotification( drama, buildNotificationMessage(drama.currentEp, drama.currentSubs));
-                            }
-                            break;
-                    }                
-                }
-            }
+            switch (drama.site) {
+                case MYASIANTV:
+                    if (drama.currentSubs == SUB) {
+                        createNotification(drama, buildNotificationMessage(drama.currentEp));
+                    }
+                    break;
+                case VIKI:
+                    var subsPercent = parseInt(drama.currentSubs.match('[0-9]+')[0]);
+                    if (subsPercent >= userInfo.settings.minSubs) {
+                        createNotification( drama, buildNotificationMessage(drama.currentEp, drama.currentSubs));
+                    }
+                    break;
+            }                
         }
-        xhr.open("GET", url, true);
-        xhr.responseType = "document";
-        xhr.send();
-    }
+    });
 }
 
 function buildNotificationMessage(episodeNumber, subs) {
-    if (subs) {
-        subs = subs + " ";
-    }
-    return "Episode " + episodeNumber + " is " + subs + "subbed!";
+    subs = subs ? subs + " subbed!" : "subbed!";
+    return "Episode " + episodeNumber + " is " + subs;
 }
