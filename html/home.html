@@ -4,7 +4,7 @@
 		<img id="logo" src="/img/icon48.png" />
 	</div>
 	<h1 id="title">DramaTracker</h1>
-	<p>Currently tracking {{ dramas.length }} dramas!</p>
+	<p>Currently tracking {{ dramas.length }} drama<span ng-if="dramas.length != 1">s</span>!</p>
 	<a class="glyphicon glyphicon-plus-sign add-new" data-toggle="collapse" data-target="#track-new"></a>
 	<form class="collapse" id="track-new">
 		<div class="form-group col-md-12">
