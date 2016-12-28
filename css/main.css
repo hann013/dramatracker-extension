@@ -90,10 +90,16 @@ a.glyphicon:hover {
     border-radius: 50%;
 }
 
-.viki img, .dramafever img {
+.dramafever img, .viki img {
     margin-left: -50%;
     height: 100%;
     width: auto;
+}
+
+.dramanice img {
+    margin-left: -25%;
+    height: 100%;
+    width: auto;  
 }
 
 .myasiantv img {
