@@ -6,7 +6,7 @@ app.controller("HomeController", function($scope, UserService) {
     $scope.today = (new Date()).getDay();
     $scope.dramas = [];
     $scope.airDays = [];
-    $scope.daysOfWeek = { 0 : "S", 1 : "M", 2 :"T", 3 :"W", 4 :"T", 5 :"F", 6 :"S" };
+    $scope.daysOfWeek = DAYS_OF_WEEK;
 
     for (url in UserService.user.dramaUrls) {
         getDramaDetails(url);
@@ -22,26 +22,29 @@ app.controller("HomeController", function($scope, UserService) {
         });
     }
 
+    // Set drama list sort order based on next air day
     function getNextAirDay(url) {
-        // Set sort order by next air day
-        var dramaAirDays = UserService.user.dramaUrls[url].airDays;
-        var nextAirDay = UNKNOWN_AIR_DAYS;
+        let dramaAirDays = UserService.user.dramaUrls[url].airDays;
+        let nextAirDay = UNKNOWN_AIR_DAYS;
 
         if (dramaAirDays.length > 0) {
-            var largest = dramaAirDays[dramaAirDays.length-1];
+            // Get the latest air day
+            let largest = dramaAirDays[dramaAirDays.length-1];
 
             // Next episode airs this week
             if (largest >= $scope.today) {
+                // Look for next air day
                 for (i = 0; i < dramaAirDays.length; i++) {
-                    var day = dramaAirDays[i];
+                    let day = dramaAirDays[i];
                     if (day >= $scope.today) {
                         largest = day;
                         break;
                     }
                 }
                 nextAirDay = largest - $scope.today;
+
             // Next episode airs next week
-            } else {
+            } else {    
                 nextAirDay = dramaAirDays[0] + UNKNOWN_AIR_DAYS - $scope.today;
             }
         }
@@ -52,11 +55,11 @@ app.controller("HomeController", function($scope, UserService) {
     // Save new dramas
     $scope.newDramaUrl = "";
     $scope.save = function() {
-        var newDramaUrl = $scope.newDramaUrl;
+        let newDramaUrl = $scope.newDramaUrl;
 
         // Show error message if URL is invalid
         if (!newDramaUrl || UserService.user.dramaUrls.hasOwnProperty(newDramaUrl)) {
-            var errorMessage = !newDramaUrl ? INVALID_URL_ERR : DUPLICATE_ERR;
+            let errorMessage = !newDramaUrl ? INVALID_URL_ERR : DUPLICATE_ERR;
             showError("url-input", "error-message", errorMessage);
         } else {
             // Collapse the form
@@ -84,10 +87,10 @@ app.controller("SettingsController", function($scope, $location, UserService) {
     $scope.save = function() {
         if (!$scope.settings.updateFrequency || !$scope.settings.minSubs) {
             if (!$scope.settings.updateFrequency) {
-                showError("freq-input", "error-frequency", "Please enter a number greater than 1.");
+                showError("freq-input", "error-frequency", INVALID_FREQ_ERROR);
             }
             if (!$scope.settings.minSubs) {
-                showError("subs-input", "error-subs", "Please enter a number between 0 and 100.");
+                showError("subs-input", "error-subs", INVALID_SUBS_ERROR);
             }
         } else {
             UserService.save();
@@ -96,14 +99,14 @@ app.controller("SettingsController", function($scope, $location, UserService) {
     }
 });
 
-// Directive for tracking Multiple checkboxes
+// Directive for tracking multiple checkboxes
 app.directive("checkboxGroup", function() {
     return {
         restrict: "A",
         link: function(scope, element, attrs) {
             // update array whenever checkbox is clicked
             element.bind("click", function() {
-                var index = scope.airDays.indexOf(scope.num);
+                let index = scope.airDays.indexOf(scope.num);
 
                 // add to list if checked, remove from list if unchecked
                 if (element[0].checked) {
@@ -207,4 +210,7 @@ function showError(inputId, messageId, message) {
 // Error message constants
 var INVALID_URL_ERR = "Please enter a valid URL.";
 var DUPLICATE_ERR = "You're already tracking this drama!";
+var INVALID_FREQ_ERROR = "Please enter a number greater than 1.";
+var INVALID_SUBS_ERROR = "Please enter a number between 0 and 100.";
 var UNKNOWN_AIR_DAYS = 7;
+var DAYS_OF_WEEK = { 0 : "S", 1 : "M", 2 : "T", 3 : "W", 4 : "T", 5 : "F", 6 : "S" };

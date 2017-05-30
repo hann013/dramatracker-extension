@@ -1,6 +1,6 @@
 /* 
 
-Default user settings
+User settings format
 
 dramaUrls: {
     "http://urlOfDrama": {
@@ -14,6 +14,8 @@ settings: {
 } 
 
 */ 
+
+// Default user settings
 var defaultSettings = {
     dramaUrls: {},
     settings: {

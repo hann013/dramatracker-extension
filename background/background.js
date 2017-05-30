@@ -21,7 +21,7 @@ $(function() {
 
     // Set alarm to check for updates periodically
     chrome.alarms.onAlarm.addListener(function(alarm) {
-        var url = alarm.name;
+        let url = alarm.name;
         getDramaUpdates(url);
     });
 
@@ -34,7 +34,7 @@ $(function() {
 
     // Set listener for "Watch now" button
     chrome.notifications.onButtonClicked.addListener(function(id, buttonIndex) {
-        var dramaInfo = currentDramasInfo[id];
+        let dramaInfo = currentDramasInfo[id];
 
         // "Watch now" button clicked
         if (buttonIndex == 0) {
@@ -60,20 +60,16 @@ function updateDramaTracking() {
     console.log("Tracking");
 
     // Clear all previous alarms
-    chrome.alarms.getAll(function(alarms) {
-        for (i = 0; i < alarms.length; i++) {
-            var alarmName = alarms[i].name;
-            chrome.alarms.clear(alarmName);
-        }
-    });
+    chrome.alarms.clearAll();
 
     // Get updated settings
     userInfo = localStorage.DramaTracker ? JSON.parse(localStorage.DramaTracker) : defaultSettings;
-    var airingToday = getDramasAiringToday();
+    let airingTodayUrls = getDramasAiringToday();
 
-    // Set up periodic polling for drama updates
-    for (i = 0; i < airingToday.length; i++) {
-        var url = airingToday[i];   
+    // Set up new alarms to poll periodically for drama updates
+    for (i = 0; i < airingTodayUrls.length; i++) {
+        let url = airingTodayUrls[i];
+
         chrome.alarms.create(url, { 
            periodInMinutes: userInfo.settings.updateFrequency
         });
@@ -85,24 +81,26 @@ function getDramasAiringToday() {
     var today = (new Date()).getDay();
     var dramaUrls = userInfo.dramaUrls;
 
-    var airingToday = [];
+    var airingTodayUrls = [];
 
     for (var url in dramaUrls) {
         var airDays = dramaUrls[url].airDays;
 
         for (var i = 0; i < airDays.length; i++) {
             if (airDays[i] == today) {
-                airingToday.push(url);
+                airingTodayUrls.push(url);
             }
         }
     }
 
-    return airingToday;
+    return airingTodayUrls;
 }
 
 // Generate notifications based on selected frequency
-function createNotification(drama, messageBody) {
-    var opt = {
+function createNotification(drama, subs) {
+    let messageBody = buildNotificationMessage(drama.currentEp, subs);
+
+    let opt = {
         type: "basic",
         title: drama.name,
         message: messageBody,
@@ -129,7 +127,7 @@ function createNotification(drama, messageBody) {
 // Get drama details and check for updates
 function getDramaUpdates(url) {
     scrapeDrama(url, function(drama) {
-        var lastWatched = userInfo.dramaUrls[url] ? userInfo.dramaUrls[url].lastWatched : null;
+        let lastWatched = userInfo.dramaUrls[url] ? userInfo.dramaUrls[url].lastWatched : null;
 
         // Only show notification for a new episode
         if (!lastWatched || drama.currentEp > lastWatched) {
@@ -138,25 +136,26 @@ function getDramaUpdates(url) {
             console.log(drama.name + ": " + drama.currentSubs + " at " + (new Date()).toTimeString());
 
             switch (drama.site) {
-                case MYASIANTV:
-                    if (drama.currentSubs == SUB) {
-                        createNotification(drama, buildNotificationMessage(drama.currentEp));
-                    }
-                    break;
                 case VIKI:
                     var subsPercent = parseInt(drama.currentSubs.match(REGEX_NUMBERS)[0]);
                     if (subsPercent >= userInfo.settings.minSubs) {
-                        createNotification(drama, buildNotificationMessage(drama.currentEp, drama.currentSubs));
+                        createNotification(drama, drama.currentSubs);
                     }
                     break;
                 case DRAMAFEVER:
-                    createNotification(drama, buildNotificationMessage(drama.currentEp, "possibly"));
+                    createNotification(drama, "possibly");
+                    break;
+                default:
+                    if (drama.currentSubs.toLowerCase() == SUB) {
+                        createNotification(drama);
+                    }
                     break;
             }
         }
     });
 }
 
+// Construct the message displayed in the notification
 function buildNotificationMessage(episodeNumber, subs) {
     subs = subs ? subs + " subbed!" : "subbed!";
     return "Episode " + episodeNumber + " is " + subs;
