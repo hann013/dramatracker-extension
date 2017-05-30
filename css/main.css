@@ -96,13 +96,7 @@ a.glyphicon:hover {
     width: auto;
 }
 
-.dramanice img {
-    margin-left: -25%;
-    height: 100%;
-    width: auto;  
-}
-
-.myasiantv img {
+.myasiantv img, .dramanice img {
     height: auto;
     width: 100%;
 }
