@@ -17,6 +17,7 @@ app.controller("HomeController", function($scope, UserService) {
             drama.url = url;
             drama.airDayFromToday = getNextAirDay(url);
 
+            // Add drama to the list of dramas being displayed
             $scope.dramas.push(drama);
             $scope.$apply();
         });
@@ -127,17 +128,17 @@ app.directive("dramaItem", function(UserService) {
         scope: true,
         templateUrl: "/html/drama.html",
         link: function(scope, element, attrs) {
-            var drama = scope.drama;
+            let drama = scope.drama;
             
             // Update a drama's last watched episode
-            var watchButton = $(element).find(".watch-drama");
+            let watchButton = $(element).find(".watch-drama");
             watchButton.on('click', function() {
                 setWatchedEp(drama.url, drama.currentEp, UserService);
                 goToUrl(drama.currentUrl);
             });
 
             // Delete a drama
-            var deleteButton = $(element).find(".delete-drama");
+            let deleteButton = $(element).find(".delete-drama");
             deleteButton.on('click', function() {               
                 // Delete saved URL
                 delete UserService.user.dramaUrls[drama.url];
@@ -162,7 +163,7 @@ app.directive("dramaItem", function(UserService) {
 // Service to save user settings
 app.factory('UserService', function(){ 
     // Save and restore user settings to/from Chrome local storage
-    var service = {
+    let service = {
         user: {},
         save: function() {
             localStorage.DramaTracker = angular.toJson(service.user);

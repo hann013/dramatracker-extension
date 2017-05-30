@@ -76,16 +76,16 @@ function xPathEvaluate(path, html) {
 
 function scrapeDrama(url, callback) {
     // Check website to determine scrape
-    var siteComponents = new URL(url).hostname.split('.');
-    var domain = siteComponents.length == 2 ? siteComponents[0] : siteComponents[1];
-    var siteToScrape = domain in scrapeConstants ? domain : null;
+    let siteComponents = new URL(url).hostname.split('.');
+    let domain = siteComponents.length == 2 ? siteComponents[0] : siteComponents[1];
+    let siteToScrape = domain in scrapeConstants ? domain : null;
 
     // If supported, scrape the site and run callback
     if (siteToScrape) {
-        var xhr = new XMLHttpRequest();
+        let xhr = new XMLHttpRequest();
         xhr.onreadystatechange = function() { 
             if (xhr.readyState == 4 && xhr.status == 200) {
-                var drama = scrapeSite(xhr.responseXML, siteToScrape, url);
+                let drama = scrapeSite(xhr.responseXML, siteToScrape, url);
                 callback(drama);
             }
         }
@@ -96,8 +96,8 @@ function scrapeDrama(url, callback) {
 }
 
 function scrapeSite(html, website, url) {
-    var drama = { site: website };
-    var constants = scrapeConstants[website];
+    let drama = { site: website };
+    let constants = scrapeConstants[website];
 
     drama.name = xPathEvaluate(constants.name, html).trim();
 
@@ -106,13 +106,13 @@ function scrapeSite(html, website, url) {
         drama.image = "http:" + drama.image;
     }
 
-    var currentEp = xPathEvaluate(constants.currentEpNumber, html).trim();
-    var numbers = currentEp.match(REGEX_NUMBERS); 
+    let currentEp = xPathEvaluate(constants.currentEpNumber, html).trim();
+    let numbers = currentEp.match(REGEX_NUMBERS); 
     drama.currentEp = numbers != null ? numbers[numbers.length - 1] : 0;
     
     drama.currentUrl = xPathEvaluate(constants.currentEpUrl, html);
     if (drama.currentUrl.indexOf("http:") == -1 && drama.currentUrl.indexOf("https:") == -1) {
-        var urlBase = url.substring(0, url.indexOf('/', 10));
+        let urlBase = url.substring(0, url.indexOf('/', 10));
         drama.currentUrl = urlBase + drama.currentUrl;
     }
 
@@ -121,15 +121,15 @@ function scrapeSite(html, website, url) {
             drama.currentSubs = "Check DF";
             break;
         case DRAMANICE:
-            var currentSubs = xPathEvaluate(constants.currentSubs, html).trim();
+            let currentSubs = xPathEvaluate(constants.currentSubs, html).trim();
             drama.currentSubs = currentSubs.substring(currentSubs.indexOf("|")+2);
             break;
         case MYASIANTV:
-            var currentSubs = xPathEvaluate(constants.currentSubs, html);
+            let currentSubs = xPathEvaluate(constants.currentSubs, html);
             drama.currentSubs = currentSubs.substring(currentSubs.lastIndexOf("/")+1, currentSubs.indexOf(".png"));
             break;
         case VIKI:
-            var currentSubs = xPathEvaluate('//a[@href="' + drama.currentUrl + '"]' + constants.currentSubs, html);
+            let currentSubs = xPathEvaluate('//a[@href="' + drama.currentUrl + '"]' + constants.currentSubs, html);
             drama.currentSubs = currentSubs.match(REGEX_NUMBERS)[0] + "%";
             break;
     }

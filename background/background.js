@@ -41,19 +41,20 @@ $(function() {
             // Open tab for current episode and set episode as watched
             goToUrl(dramaInfo.url);
             setWatchedEp(id, dramaInfo.episode);
-
-            // Clear tracking for this drama
-            chrome.notifications.clear(id);
-            chrome.alarms.clear(id);
+            clearDramaTracking(id);
 
         // "Mute notifications" button clicked
         } else if (buttonIndex == 1) {
-            // Clear tracking for this drama
-            chrome.notifications.clear(id);
-            chrome.alarms.clear(id);
+            clearDramaTracking(id);
         }
     });
 });
+
+// Clear tracking and notifications for a drama
+function clearDramaTracking(id) {
+    chrome.notifications.clear(id);
+    chrome.alarms.clear(id);
+}
 
 // Get updated settings and update tracking of dramas
 function updateDramaTracking() {
@@ -98,9 +99,10 @@ function getDramasAiringToday() {
 
 // Generate notifications based on selected frequency
 function createNotification(drama, subs) {
+    // Create notification
     let messageBody = buildNotificationMessage(drama.currentEp, subs);
 
-    let opt = {
+    let notificationOptions = {
         type: "basic",
         title: drama.name,
         message: messageBody,
@@ -115,7 +117,7 @@ function createNotification(drama, subs) {
         }]
     };
     
-    chrome.notifications.create(drama.url, opt);
+    chrome.notifications.create(drama.url, notificationOptions);
 
     // Update the drama's current URL and episode number
     currentDramasInfo[drama.url] = { 
