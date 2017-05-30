@@ -55,6 +55,10 @@ a.glyphicon:hover {
     margin-top: 3%;
 }
 
+.air-label {
+    display: block;
+}
+
 .error {
     color: #a94442;
 }
