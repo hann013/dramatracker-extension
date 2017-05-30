@@ -1,10 +1,14 @@
 <div class="page-header">
+	<!-- Logo and title -->
 	<div class="logo">
 		<a href="#/settings" class="glyphicon glyphicon-cog" id="settings-overlay"></a>
 		<img id="logo" src="/img/icon48.png" />
 	</div>
 	<h1 id="title">DramaTracker</h1>
+	
 	<p>Currently tracking {{ dramas.length }} drama<span ng-if="dramas.length != 1">s</span>!</p>
+	
+	<!-- Track new drama form -->
 	<a class="glyphicon glyphicon-plus-sign add-new" data-toggle="collapse" data-target="#track-new"></a>
 	<form class="collapse" id="track-new">
 		<div class="form-group col-md-12">
@@ -24,6 +28,7 @@
 		</div>
 	</form>
 </div>
+<!-- List of currently-tracked dramas -->
 <div class="drama" ng-repeat="drama in dramas | orderBy : 'airDayFromToday'">
 	<drama-item data-index="{{ dramas.indexOf(drama) }}" />
 </div>
