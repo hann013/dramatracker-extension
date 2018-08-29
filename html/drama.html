@@ -2,12 +2,16 @@
     <!-- Delete button -->
     <a class="glyphicon glyphicon-remove-circle delete-drama"></a>
     <!-- Drama image and details -->
-	<div class="circle-image" ng-if="drama.image">
-		<img class="drama-image" ng-src="{{ drama.image }}"/>
-	</div>
-    <h3 class="drama-name">{{ drama.name }}</h3>
-    <p class="drama-info" ng-if="drama.currentEp">Episode: {{ drama.currentEp }} <span ng-if="drama.currentSubs">({{ drama.currentSubs | uppercase }})</span></p>
-    <!-- Watch current episode button -->
-    <a class="glyphicon glyphicon-eye-open watch-drama"></a>
-    <hr>
+    <div class="circle-image" ng-if="drama.image">
+        <img class="drama-image" ng-src="{{ drama.image }}" width="100%" height="100%" />
+    </div>
+    <div class="row">
+        <div class="col-sm-4 drama-name">{{ drama.name }}</div>
+        <div class="col-sm-3 drama-info" ng-if="drama.currentEp">Episode: {{ drama.currentEp }}
+            <span ng-if="drama.currentSubs">({{ drama.currentSubs | uppercase }})</span>
+        </div>
+        <a class="col-sm-1 glyphicon glyphicon-eye-open watch-drama"></a>
+        <!-- Watch current episode button -->
+    </div>
+    <hr class="drama-hr">
 </div>

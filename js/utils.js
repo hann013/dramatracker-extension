@@ -32,6 +32,7 @@ var SUB = "sub";
 // Site constants
 var DRAMAFEVER = "dramafever";
 var DRAMANICE = "dramanice";
+var ONDRAMANICE = "ondramanice";
 var MYASIANTV = "myasiantv";
 var VIKI = "viki";
 
@@ -44,7 +45,15 @@ var scrapeConstants = {
         currentSubs: null
     },
 
-    "dramanice" : {
+    "dramanice": {
+        name: '//div[@class="info_right"]/h2/text()',
+        image: '//div[@class="img_cover"]//img/attribute::src',
+        currentEpNumber: '//ul[@class="list_episode"]/li',
+        currentEpUrl: '//ul[@class="list_episode"]/li/a/attribute::href',
+        currentSubs: '//ul[@class="list_episode"]/li'
+    },
+
+    "ondramanice": {
         name: '//div[@class="info_right"]/h2/text()',
         image: '//div[@class="img_cover"]//img/attribute::src',
         currentEpNumber: '//ul[@class="list_episode"]/li',
@@ -116,24 +125,30 @@ function scrapeSite(html, website, url) {
         drama.currentUrl = urlBase + drama.currentUrl;
     }
 
-    switch (website) {
-        case DRAMAFEVER:
-            drama.currentSubs = "Check DF";
-            break;
+        //LET didn't like scoping of currentSubs = ... so added scope brackets
+        switch (website) {
+        case DRAMAFEVER: {
+                drama.currentSubs = "Check DF";
+                break;
+            }
         case DRAMANICE:
-            let currentSubs = xPathEvaluate(constants.currentSubs, html).trim();
-            drama.currentSubs = currentSubs.substring(currentSubs.indexOf("|")+2);
-            break;
-        case MYASIANTV:
-            let currentSubs = xPathEvaluate(constants.currentSubs, html);
-            drama.currentSubs = currentSubs.substring(currentSubs.lastIndexOf("/")+1, currentSubs.indexOf(".png"));
-            break;
-        case VIKI:
-            let currentSubs = xPathEvaluate('//a[@href="' + drama.currentUrl + '"]' + constants.currentSubs, html);
-            drama.currentSubs = currentSubs.match(REGEX_NUMBERS)[0] + "%";
-            break;
+        case ONDRAMANICE: {
+                let cs = xPathEvaluate(constants.currentSubs, html).trim();
+                drama.currentSubs = cs.substring(cs.indexOf("|") + 2);
+                break;
+            }
+        case MYASIANTV: {
+                let cs = xPathEvaluate(constants.currentSubs, html);
+                drama.currentSubs = cs.substring(cs.lastIndexOf("/") + 1, cs.indexOf(".png"));
+                break;
+            }
+        case VIKI: {
+                let cs = xPathEvaluate('//a[@href="' + drama.currentUrl + '"]' + constants.currentSubs, html);
+                drama.currentSubs = cs.match(REGEX_NUMBERS)[0] + "%";
+                break;
+            }
     }
-    
+
     return drama;
 }
 

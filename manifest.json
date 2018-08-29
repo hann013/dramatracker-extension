@@ -1,11 +1,12 @@
 {
 	"manifest_version" : 2,
-	"version": "1.0",
+	"version": "1.1.1",
 	
 	"name" : "DramaTracker",
 	"description" : "Track your favourite dramas!",
 	"icons" : {
-		"48" : "img/icon48.png"
+		"48" : "img/icon48.png",
+		"128" : "img/icon128.png"
 	},
 
 	"browser_action" : {
@@ -20,8 +21,6 @@
 	"permissions" : [
 		"notifications",
 		"alarms",
-		"background",
-		"https://*/",
-		"http://*/"
+		"background"
 	]
 }

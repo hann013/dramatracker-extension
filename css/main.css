@@ -87,8 +87,10 @@ a.glyphicon:hover {
 
 .circle-image {
     margin: auto;
-    width: 125px;
-    height: 125px;
+    height: auto;
+    width: auto;
+    max-width: 125px;
+    max-height: 125px;
     position: relative;
     overflow: hidden;
     border-radius: 50%;
@@ -103,6 +105,11 @@ a.glyphicon:hover {
 .myasiantv img, .dramanice img {
     height: auto;
     width: 100%;
+}
+
+.drama-hr {
+    margin-top: 2px;
+    margin-bottom: 8px;
 }
 
 /* Settings */

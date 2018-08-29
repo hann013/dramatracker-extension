@@ -23,13 +23,13 @@
 		<div class="form-group">
 		    <label class="control-label air-label">Airs on:</label>
 	    	<label class="checkbox-inline" ng-repeat="(num,day) in daysOfWeek">
-	    		<input checkbox-group class="air-date" type="checkbox" value="{{ num }}">{{ day }}</input>
+				<input checkbox-group class="air-date" type="checkbox" checked="checked" value="{{ num }}">{{ day }} </input>
 	    	</label>
 		</div>
 	</form>
 </div>
-<!-- List of currently-tracked dramas -->
-<div class="drama" ng-repeat="drama in dramas | orderBy : 'airDayFromToday'">
+<!-- List of currently-tracked dramas :  orderBy : 'airDayFromToday' -->
+<div class="drama" ng-repeat="drama in dramas | orderBy : 'name'">
 	<drama-item data-index="{{ dramas.indexOf(drama) }}" />
 </div>
 
