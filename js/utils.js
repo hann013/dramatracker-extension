@@ -125,28 +125,24 @@ function scrapeSite(html, website, url) {
         drama.currentUrl = urlBase + drama.currentUrl;
     }
 
-        //LET didn't like scoping of currentSubs = ... so changed to cs and added scope bracket
+        //LET didn't like scoping of currentSubs = ... so added scope brackets
         switch (website) {
-        case DRAMAFEVER:
-            {
+        case DRAMAFEVER: {
                 drama.currentSubs = "Check DF";
                 break;
             }
         case DRAMANICE:
-        case ONDRAMANICE:
-            {
+        case ONDRAMANICE: {
                 let cs = xPathEvaluate(constants.currentSubs, html).trim();
                 drama.currentSubs = cs.substring(cs.indexOf("|") + 2);
                 break;
             }
-        case MYASIANTV:
-            {
+        case MYASIANTV: {
                 let cs = xPathEvaluate(constants.currentSubs, html);
                 drama.currentSubs = cs.substring(cs.lastIndexOf("/") + 1, cs.indexOf(".png"));
                 break;
             }
-        case VIKI:
-            {
+        case VIKI: {
                 let cs = xPathEvaluate('//a[@href="' + drama.currentUrl + '"]' + constants.currentSubs, html);
                 drama.currentSubs = cs.match(REGEX_NUMBERS)[0] + "%";
                 break;
